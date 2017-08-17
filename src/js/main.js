@@ -282,7 +282,7 @@
                  errorHandler();
              }
          });
-     }
+     };
      loginStatus(login, function () {
          window.alert("Please login to Facebook");
      });
