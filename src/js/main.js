@@ -6,6 +6,9 @@
  var map;
  var isSelected = false;
  var previousObj;
+ var loginStatus = function(x, y){
+     
+ };
  var eventIDs = [
             "41668459202412/",
             "248732562199286",
@@ -72,7 +75,7 @@
 
      // For every change in the search bar, the events and markers are filtered based on current input
      $('#search').on('input', function () {
-         getLoginStatus(function () {
+         loginStatus(function () {
              var filter = input();
              clearMarkers();
              getMarkers(filter);
@@ -126,16 +129,6 @@
  function login() {
      eventIDs.forEach(function (id) {
          getData(id);
-     });
- }
-
- function getLoginStatus(callback, errorHandler) {
-     FB.getLoginStatus(function (response) {
-         if (response.status == "connected") {
-             callback();
-         } else {
-             errorHandler();
-         }
      });
  }
 
@@ -281,7 +274,16 @@
          version: 'v2.10'
      });
      FB.AppEvents.logPageView();
-     getLoginStatus(login, function () {
+     loginStatus = function getLoginStatus(callback, errorHandler) {
+         FB.getLoginStatus(function (response) {
+             if (response.status == "connected") {
+                 callback();
+             } else {
+                 errorHandler();
+             }
+         });
+     }
+     loginStatus(login, function () {
          window.alert("Please login to Facebook");
      });
      FB.Event.subscribe('auth.logout', function () {
