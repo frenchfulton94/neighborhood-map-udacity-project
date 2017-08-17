@@ -169,7 +169,7 @@
              lng: tempEvent.longitude
          },
          map: map,
-         animation: google.maps.ANIMATE.BOUNCE
+         animation: google.maps.Animation.BOUNCE
      });
      marker.addListener('click', function () {
          stopAnimation();
@@ -292,4 +292,3 @@
      });
 
  };
-
