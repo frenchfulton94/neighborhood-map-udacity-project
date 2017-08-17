@@ -148,7 +148,7 @@
                  var tempEvent = new event(response);
 
                  addEventToModel(tempEvent);
-                 addMarkerToModel(tempEvent)
+                 addMarkerToModel(tempEvent);
              }
          }, {
              scope: "user_events",
@@ -169,7 +169,7 @@
              lng: tempEvent.longitude
          },
          map: map,
-         animation: google.maps.BOUNCE;
+         animation: google.maps.ANIMATE.BOUNCE
      });
      marker.addListener('click', function () {
          stopAnimation();
@@ -292,3 +292,4 @@
      });
 
  };
+
