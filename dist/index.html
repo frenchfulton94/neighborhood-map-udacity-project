@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Personal Event Map</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/main.min.css">
+</head>
+
+<body>
+    <main class="container">
+        <div id="row1" class="row">
+            <div id="map" class="col-12"></div>
+        </div>
+        <div id="row2" class="row">
+            <div id="nav" class="col-12 col-lg-3">
+                <section class="row  justify-content-center" id="header">
+                    <h1 id="page-title" class="col-12">Events</h1>
+                    <div class="fb-login-button col-12" data-max-rows="1" data-size="small" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="true" data-use-continue-as="false" onlogin="login();"></div>
+                    <p id="attribution" class="col-12">Powered by <a href="https://developers.facebook.com/" id="facebook">Facebook</a> API</p>
+                    <form class="col-12">
+                        <input id="search" type="search" autofocus=true name="search" placeholder="Search" required>
+                        <datalist id="eventsList"></datalist>
+                    </form>
+                </section>
+                <div class="row" data-bind="foreach: filterEvents()" id="events">
+
+                    <article id="test" class="col-12 col-md-6 col-lg-12 events">
+                        <h5 class="event-title" data-bind="text: title"></h5>
+                        <p class="event-location" data-bind="text: locationName "></p>
+                        <p class="event-time" data-bind="text: date() "></p>
+                    </article>
+
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script async defer src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
+        window.jQuery || document.write('<script src="js/jquery-3.2.1.slim.min.js"><\/script>')
+
+    </script>
+    <script async defer src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js">
+
+
+    </script>
+    <div id="bootstrapCssTest" class="hidden"></div>
+    <script>
+        $(function() {
+            if ($('#bootstrapCssTest').is(':visible')) {
+                $("head").prepend('<link rel="stylesheet" href="css/bootstrap.min.css">');
+            }
+        });
+
+    </script>
+    <script async defer type="text/javascript" src="js/main.min.js"></script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAdnAmq_mBW_pYl6wZcaDT2keTU75JnoHE&v=3&callback=initMap"></script>
+</body>
+
+</html>
