@@ -100,7 +100,7 @@
                  return marker.title == filter;
              })[0];
              selected.setMap(map);
-             //startAnimation(selected);
+             startAnimation(selected);
              previousMarker = selected;
              addInfoWindow(selected);
              $(elem).addClass('selected');
@@ -168,13 +168,12 @@
              lat: tempEvent.latitude,
              lng: tempEvent.longitude
          },
-         map: map,
-         animation: google.maps.Animation.BOUNCE
+         map: map
      });
      marker.addListener('click', function () {
          stopAnimation();
 
-         //startAnimation(this);
+         startAnimation(this);
          if (!isSelected || previousMarker != this) {
              addInfoWindow(this);
              selectListItem(this);
