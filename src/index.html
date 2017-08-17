@@ -10,11 +10,10 @@
 </head>
 
 <body>
-    <main class="container">
-        <div id="row1" class="row">
+    <main class="container-fluid">
+        <div class="row" id="anon">
             <div id="map" class="col-12"></div>
-        </div>
-        <div id="row2" class="row">
+            <!--            row1 row2-->
             <div id="nav" class="col-12 col-lg-3">
                 <section class="row  justify-content-center" id="header">
                     <h1 id="page-title" class="col-12">Events</h1>
@@ -32,8 +31,6 @@
                         <p class="event-location" data-bind="text: locationName "></p>
                         <p class="event-time" data-bind="text: date() "></p>
                     </article>
-
-
                 </div>
             </div>
         </div>
@@ -41,11 +38,8 @@
 
     <script async defer src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
         window.jQuery || document.write('<script src="js/jquery-3.2.1.slim.min.js"><\/script>')
-
     </script>
     <script async defer src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js">
-
-
     </script>
     <div id="bootstrapCssTest" class="hidden"></div>
     <script>
@@ -54,7 +48,6 @@
                 $("head").prepend('<link rel="stylesheet" href="css/bootstrap.min.css">');
             }
         });
-
     </script>
     <script async defer type="text/javascript" src="js/main.js"></script>
 
