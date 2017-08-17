@@ -20,7 +20,7 @@
             "650723261801441",
             "109548779712645"
         ];
- var event = function (obj) {
+ var eventObj = function (obj) {
      this.title = obj.name;
      this.category = obj.category;
      this.description = obj.description;
@@ -47,8 +47,8 @@
          if (!self.filter) {
              return self.events();
          } else {
-             return ko.utils.arrayFilter(self.events(), function (event) {
-                 return event.title.toLowerCase().includes(self.filter().toLowerCase());
+             return ko.utils.arrayFilter(self.events(), function (e) {
+                 return e.title.toLowerCase().includes(self.filter().toLowerCase());
              });
          }
      });
@@ -114,9 +114,9 @@
      });
 
      // Prevents default event for form submission via return key
-     $(window).keydown(function (event) {
-         if (event.keyCode == 13) {
-             event.preventDefault();
+     $(window).keydown(function (e) {
+         if (e.keyCode == 13) {
+             e.preventDefault();
              return false;
          }
      });
@@ -145,7 +145,7 @@
          '/' + id,
          function (response) {
              if (response && !response.error) {
-                 var tempEvent = new event(response);
+                 var tempEvent = new eventObj(response);
 
                  addEventToModel(tempEvent);
                  addMarkerToModel(tempEvent);
@@ -205,7 +205,7 @@
  }
 
  function stopAnimation() {
-     if (previousMarker != undefined) {
+     if (previousMarker !== undefined) {
          previousMarker.setAnimation(null);
      }
  }
@@ -230,8 +230,8 @@
 
  function addInfoWindow(obj) {
 
-     var found = ko.utils.arrayFilter(model.events(), function (event) {
-         return event.title == obj.title;
+     var found = ko.utils.arrayFilter(model.events(), function (e) {
+         return e.title == obj.title;
 
      })[0];
 
@@ -243,7 +243,7 @@
 
  function input(filter = null) {
      var obj = $('#search');
-     if (filter != null) {
+     if (filter !== null) {
          obj.val(filter);
          return;
      }
