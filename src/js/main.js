@@ -78,7 +78,7 @@
                  }
              } else {
                  console.log(response.error.message);
-                 window.alert("Sorry could not load events.")
+                 window.alert("Sorry could not load events.");
              }
          }, {
              scope: "user_events",
@@ -236,7 +236,7 @@
          } else {
              self.selectedID("");
          }
-         previousObj = obj
+         previousObj = obj;
      };
      
      // For every change in the search bar, the events and markers are filtered based on current input
