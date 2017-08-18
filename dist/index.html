@@ -17,16 +17,14 @@
             <div id="nav" class="col-12 col-lg-3">
                 <section class="row  justify-content-center" id="header">
                     <h1 id="page-title" class="col-12">Events</h1>
-                    <div class="fb-login-button col-12" data-max-rows="1" data-size="small" data-button-type="login_with" data-show-faces="false" data-auto-logout-link="true" data-use-continue-as="false" onlogin="login();"></div>
                     <p id="attribution" class="col-12">Powered by <a href="https://developers.facebook.com/" id="facebook">Facebook</a> API</p>
                     <form class="col-12">
-                        <input id="search" type="search" autofocus=true name="search" placeholder="Search" required>
-                        <datalist id="eventsList"></datalist>
+                        <input id="search" type="search" autofocus=true name="search" placeholder="Search" data-bind="textInput: userInput, event:{input: updateView}"required>
                     </form>
                 </section>
                 <div class="row" data-bind="foreach: filterEvents()" id="events">
 
-                    <article id="test" class="col-12 col-md-6 col-lg-12 events">
+                    <article id="test" class="col-12 col-md-6 col-lg-12 events" data-bind="click:$parent.clickEvent, attr: {id:id}, css:{'selected' : $parent.selectedID() === $data.id} " >
                         <h5 class="event-title" data-bind="text: title"></h5>
                         <p class="event-location" data-bind="text: locationName "></p>
                         <p class="event-time" data-bind="text: date() "></p>

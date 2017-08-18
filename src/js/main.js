@@ -1,16 +1,9 @@
- var currentUser;
  var marker;
- var previousMarker;
- var currentMarker;
  var infoWindow;
  var map;
- var isSelected = false;
- var previousObj;
- var loginStatus = function(x, y){
-     
- };
+ var model;
  var eventIDs = [
-            "41668459202412/",
+            "416684592024124",
             "248732562199286",
             "1898255727093448",
             "144302939447887",
@@ -39,25 +32,6 @@
      };
  };
 
- function viewModel() {
-     var self = this;
-     self.events = ko.observableArray();
-     self.filter = ko.observable("");
-     self.markers = ko.observableArray();
-
-     // Searches through the events array for events matching user input and returns results in an array
-     self.filterEvents = ko.computed(function () {
-         if (!self.filter) {
-             return self.events();
-         } else {
-             return ko.utils.arrayFilter(self.events(), function (e) {
-                 return e.title.toLowerCase().includes(self.filter().toLowerCase());
-             });
-         }
-     });
- }
- var model = new viewModel();
-
  // Facebook API Functionality
  (function (d, s, id) {
      var js, fjs = d.getElementsByTagName(s)[0];
@@ -71,50 +45,8 @@
  }(document, 'script', 'facebook-jssdk'));
 
  $(function (ready) {
+     model = new viewModel();
      ko.applyBindings(model);
-
-     // For every change in the search bar, the events and markers are filtered based on current input
-     $('#search').on('input', function () {
-         loginStatus(function () {
-             var filter = input();
-             clearMarkers();
-             getMarkers(filter);
-             model.filter(filter);
-         }, function () {
-             window.alert("Please login into Facebook");
-             input('');
-         });
-
-     });
-
-     // When a user clicks on an event in the list view, the event is selected and map updated with
-     // the relevant marker and infoWindow
-     $('#events').on('click', 'article', function (obj) {
-         deselectListItem();
-         clearPreviousInfoWindow();
-         clearMarkers();
-
-         var filter = input();
-         var elem = obj.currentTarget;
-         if (!isSelected || previousObj != elem) {
-
-             filter = String(elem.children[0].innerHTML);
-             var selected = ko.utils.arrayFilter(model.markers(), function (marker) {
-                 return marker.title == filter;
-             })[0];
-             selected.setMap(map);
-             startAnimation(selected);
-             previousMarker = selected;
-             addInfoWindow(selected);
-             $(elem).addClass('selected');
-             isSelected = true;
-         } else {
-             isSelected = false;
-             model.filter(input());
-         }
-         getMarkers(filter);
-         previousObj = elem;
-     });
 
      // Prevents default event for form submission via return key
      $(window).keydown(function (e) {
@@ -140,118 +72,29 @@
              if (response && !response.error) {
                  var tempEvent = new eventObj(response);
 
-                 addEventToModel(tempEvent);
-                 addMarkerToModel(tempEvent);
+                 model.addEvents(tempEvent);
+                 if (map) {
+                     model.addMarkers(tempEvent);
+                 }
+             } else {
+                 console.log(response.error.message);
+                 window.alert("Sorry could not load events.")
              }
          }, {
              scope: "user_events",
-             fields: "cover, category, description, name, place, start_time"
+             fields: "cover, category, description, name, place, start_time",
+             access_token: "1954861288122349|stY_aKUPtSl9_hRo0EKVbmFPE40"
          }
      );
  }
 
- function addEventToModel(tempEvent) {
-     model.events.push(tempEvent);
- }
-
- function addMarkerToModel(tempEvent) {
-     marker = new google.maps.Marker({
-         title: tempEvent.title,
-         position: {
-             lat: tempEvent.latitude,
-             lng: tempEvent.longitude
-         },
-         map: map
-     });
-     marker.addListener('click', function () {
-         stopAnimation();
-
-         startAnimation(this);
-         if (!isSelected || previousMarker != this) {
-             addInfoWindow(this);
-             selectListItem(this);
-             isSelected = true;
-         } else {
-             clearPreviousInfoWindow();
-             deselectListItem();
-             model.filter(input());
-             isSelected = false;
-         }
-
-         previousMarker = this;
-     });
-     model.markers.push(marker);
- }
-
- function clearMarkers() {
-     for (var i = 0; i < model.markers().length; i++) {
-         model.markers()[i].setMap(null);
-     }
- }
-
- function clearPreviousInfoWindow() {
-     infoWindow.close();
- }
-
- function startAnimation(marker) {
-     marker.setAnimation(google.maps.Animation.BOUNCE);
- }
-
- function stopAnimation() {
-     if (previousMarker !== undefined) {
-         previousMarker.setAnimation(null);
-     }
- }
-
- function getMarkers(filter) {
-     for (var i = 0; i < model.markers().length; i++) {
-         var curMarker = model.markers()[i];
-         if (curMarker.title.toLowerCase().includes(filter.toLowerCase())) {
-             curMarker.setMap(map);
-         }
-     }
- }
-
- function selectListItem(selectedMarker) {
-     model.filter(selectedMarker.title);
-     $('.events').addClass('selected');
- }
-
- function deselectListItem() {
-     $('.events').removeClass('selected');
- }
-
- function addInfoWindow(obj) {
-
-     var found = ko.utils.arrayFilter(model.events(), function (e) {
-         return e.title == obj.title;
-
-     })[0];
-
-     var content = '<style> .markerWrapper { text-align: center; width:300px; z-index: 5;} .markerImage {width: 300px; height: 200px; }.markerTitle { margin-top: 15px; } .markerDate {margin: 0;} .markerCategory{margin: 0;} .markerDescription{ margin-top: 15px; height: 100px; text-align: justify; width: inherit;}</style> <div class="markerWrapper"><img class="markerImage" src="' + found.image + '" alt="' + found.title + ' Event Image">' + '<h5 class="markerTitle">' + found.title + '</h5>' + '<p class="markerCategory">' + found.category + '</p>' + '<p class="markerDate">' + found.date() + '</p>' + '<p class="markerDescription">' + found.description + '</p></div>';
-     infoWindow.setContent(content);
-
-     infoWindow.open(map, obj);
- }
-
- function input(filter = null) {
-     var obj = $('#search');
-     if (filter !== null) {
-         obj.val(filter);
-         return;
-     }
-     return obj.val();
- }
 
  function infoWindowInit() {
      infoWindow = new google.maps.InfoWindow();
      infoWindow.setWidth = 300;
      google.maps.event.addListener(infoWindow, 'closeclick', function () {
-         deselectListItem();
-         clearMarkers();
-         var val = input();
-         getMarkers(val);
-         model.filter(val);
+         model.stopAnimation();
+         model.selectedID("");
      });
  }
 
@@ -274,22 +117,134 @@
          version: 'v2.10'
      });
      FB.AppEvents.logPageView();
-     loginStatus = function getLoginStatus(callback, errorHandler) {
-         FB.getLoginStatus(function (response) {
-             if (response.status == "connected") {
-                 callback();
+
+     login();
+ };
+
+ function error() {
+     window.alert("Could not load google maps. Please Refresh.");
+ }
+
+ function viewModel() {
+     var self = this;
+     self.previousObj;
+     self.previousMarker = ko.observable();
+     self.events = ko.observableArray();
+     self.markers = ko.observableArray();
+     self.userInput = ko.observable("");
+     self.selectedID = ko.observable("");
+
+     // Searches through the events array for events matching user input and returns results in an array
+     self.filterEvents = ko.computed(function () {
+         if (!self.userInput()) {
+             return self.events();
+         } else {
+             return ko.utils.arrayFilter(self.events(), function (e) {
+                 return e.title.toLowerCase().includes(self.userInput().toLowerCase());
+             });
+         }
+     });
+
+     self.addEvents = function (tempEvent) {
+         self.events.push(tempEvent);
+     };
+
+     self.addMarkers = function (tempEvent) {
+         marker = new google.maps.Marker({
+             title: tempEvent.id,
+             position: {
+                 lat: tempEvent.latitude,
+                 lng: tempEvent.longitude
+             },
+             map: map
+         });
+         marker.addListener('click', function () {
+             self.stopAnimation();
+             self.startAnimation(this);
+             if (!self.checkedIsSelected(this.title)) {
+                 self.addInfoWindow(this);
+                 self.selectedID(this.title);
              } else {
-                 errorHandler();
+                 self.clearPreviousInfoWindow();
+                 self.selectedID("");
+             }
+             self.previousMarker(this);
+         });
+
+         self.markers.push(marker);
+     };
+
+     self.getMarkers = function getMarkers(filter = self.userInput()) {
+         self.markers().forEach(function (marker) {
+             var result = self.events().find(function (event) {
+                 return event.id == marker.title;
+             });
+             if (result.title.toLowerCase().includes(filter.toLowerCase())) {
+                 marker.setMap(map);
              }
          });
      };
-     loginStatus(login, function () {
-         window.alert("Please login to Facebook");
-     });
-     FB.Event.subscribe('auth.logout', function () {
-         clearMarkers();
-         isSelected = false;
-         location.reload();
-     });
 
- };
+     self.clearMarkers = function () {
+         for (var i = 0; i < self.markers().length; i++) {
+             self.markers()[i].setMap(null);
+         }
+     };
+
+     self.addInfoWindow = function (obj) {
+
+         var found = ko.utils.arrayFilter(self.events(), function (e) {
+             return e.id == obj.title;
+         })[0];
+
+         var content = '<style> .markerWrapper { text-align: center; width:300px; z-index: 5;} .markerImage {width: 300px; height: 200px; }.markerTitle { margin-top: 15px; } .markerDate {margin: 0;} .markerCategory{margin: 0;} .markerDescription{ margin-top: 15px; height: 100px; text-align: justify; width: inherit;}</style> <div class="markerWrapper"><img class="markerImage" src="' + found.image + '" alt="' + found.title + ' Event Image">' + '<h5 class="markerTitle">' + found.title + '</h5>' + '<p class="markerCategory">' + found.category + '</p>' + '<p class="markerDate">' + found.date() + '</p>' + '<p class="markerDescription">' + found.description + '</p></div>';
+         infoWindow.setContent(content);
+
+         infoWindow.open(map, obj);
+     };
+
+     self.clearPreviousInfoWindow = function () {
+         infoWindow.close();
+     };
+
+     self.startAnimation = function (marker) {
+         marker.setAnimation(google.maps.Animation.BOUNCE);
+     };
+
+     self.stopAnimation = function () {
+         if (self.previousMarker() !== undefined) {
+             self.previousMarker().setAnimation(null);
+         }
+     };
+
+     self.checkedIsSelected = function (id) {
+         return self.selectedID() == id;
+     };
+     
+     self.clickEvent = function (obj) {
+         self.clearPreviousInfoWindow();
+         self.stopAnimation();
+         if (!self.checkedIsSelected(obj.id) || previousObj != obj) {
+             var filter = obj.id;
+             self.selectedID(filter);
+             var selected = ko.utils.arrayFilter(self.markers(), function (marker) {
+                 return marker.title == filter;
+             })[0];
+             self.startAnimation(selected);
+             self.addInfoWindow(selected);
+             self.previousMarker(selected);
+         } else {
+             self.selectedID("");
+         }
+         previousObj = obj
+     };
+     
+     // For every change in the search bar, the events and markers are filtered based on current input
+     self.updateView = function (obj) {
+         self.selectedID("");
+         self.clearPreviousInfoWindow();
+         self.clearMarkers();
+         self.getMarkers(self.userInput());
+     };
+ }
+
