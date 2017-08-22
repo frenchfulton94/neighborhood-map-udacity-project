@@ -2,20 +2,58 @@
  var infoWindow;
  var map;
  var model;
- var eventIDs = [
-            "416684592024124",
-            "248732562199286",
-            "1898255727093448",
-            "144302939447887",
-            "1843955289178024",
-            "1715694788728873",
-            "1916049402017980",
-            "245494989254770",
-            "122692371654560",
-            "662584573930584",
-            "650723261801441",
-            "109548779712645"
-        ];
+ var id;
+ var eventIDs = {
+     "1898255727093448": {
+         lat: 40.8172,
+         lng: -73.9489
+     },
+     "1843955289178024": {
+         lat: 40.71926,
+         lng: -73.96168
+     },
+     "248732562199286": {
+         lat: 40.8045,
+         lng: -73.9437
+     },
+     "1715694788728873": {
+         lat: 40.6972,
+         lng: -73.9794
+     },
+     "144302939447887": {
+         lat: 40.71929,
+         lng: -73.9386899
+     },
+     "416684592024124": {
+         lat: 40.772673,
+         lng: -73.971048
+     },
+     "122692371654560": {
+         lat: 40.70852,
+         lng: -73.93769
+     },
+     "245494989254770": {
+         lat: 40.728230894061,
+         lng: -73.957647127955
+     },
+     "1916049402017980": {
+         lat: 40.74294,
+         lng: -74.00569
+     },
+     "650723261801441": {
+         lat: 40.71929,
+         lng: -73.9386899
+     },
+     "662584573930584": {
+         lat: 40.65,
+         lng: -73.95
+     },
+     "109548779712645": {
+         lat: 40.76986,
+         lng: -73.99267
+     }
+ };
+
  var eventObj = function (obj) {
      this.title = obj.name;
      this.category = obj.category;
@@ -43,10 +81,10 @@
      js.src = "//connect.facebook.net/en_US/sdk.js";
      fjs.parentNode.insertBefore(js, fjs);
  }(document, 'script', 'facebook-jssdk'));
-
+ model = new viewModel();
+ ko.applyBindings(model);
  $(function (ready) {
-     model = new viewModel();
-     ko.applyBindings(model);
+    
 
      // Prevents default event for form submission via return key
      $(window).keydown(function (e) {
@@ -59,9 +97,9 @@
 
  // When a user logins, grab the facebook event IDs and grab relevant data from API
  function login() {
-     eventIDs.forEach(function (id) {
+     for (id in eventIDs) {
          getData(id);
-     });
+     }
  }
 
  // Grab event information from facebook API
@@ -71,11 +109,7 @@
          function (response) {
              if (response && !response.error) {
                  var tempEvent = new eventObj(response);
-
                  model.addEvents(tempEvent);
-                 if (map) {
-                     model.addMarkers(tempEvent);
-                 }
              } else {
                  console.log(response.error.message);
                  window.alert("Sorry could not load events.");
@@ -87,7 +121,6 @@
          }
      );
  }
-
 
  function infoWindowInit() {
      infoWindow = new google.maps.InfoWindow();
@@ -107,6 +140,11 @@
          zoom: 12
      });
      infoWindowInit();
+     var counter = 0;
+     for (id in eventIDs) {
+         model.addMarkers(id, eventIDs[id]);
+     }
+     model.stopAllAnimation();
  }
 
  window.fbAsyncInit = function () {
@@ -119,6 +157,7 @@
      FB.AppEvents.logPageView();
 
      login();
+     
  };
 
  function error() {
@@ -149,14 +188,12 @@
          self.events.push(tempEvent);
      };
 
-     self.addMarkers = function (tempEvent) {
+     self.addMarkers = function (id, position) {
          marker = new google.maps.Marker({
-             title: tempEvent.id,
-             position: {
-                 lat: tempEvent.latitude,
-                 lng: tempEvent.longitude
-             },
-             map: map
+             title: id,
+             position: position,
+             map: map,
+             animation: google.maps.Animation.BOUNCE
          });
          marker.addListener('click', function () {
              self.stopAnimation();
@@ -174,9 +211,12 @@
          self.markers.push(marker);
      };
 
-     self.getMarkers = function getMarkers(filter = self.userInput()) {
+     self.getMarkers = function (filter = self.userInput()) {
          self.markers().forEach(function (marker) {
+             
              var result = self.events().find(function (event) {
+
+                 
                  return event.id == marker.title;
              });
              if (result.title.toLowerCase().includes(filter.toLowerCase())) {
@@ -192,14 +232,12 @@
      };
 
      self.addInfoWindow = function (obj) {
-
-         var found = ko.utils.arrayFilter(self.events(), function (e) {
-             return e.id == obj.title;
-         })[0];
+         var found = self.events().find(function (event) {
+             return event.id == obj.title;
+         });
 
          var content = '<style> .markerWrapper { text-align: center; width:300px; z-index: 5;} .markerImage {width: 300px; height: 200px; }.markerTitle { margin-top: 15px; } .markerDate {margin: 0;} .markerCategory{margin: 0;} .markerDescription{ margin-top: 15px; height: 100px; text-align: justify; width: inherit;}</style> <div class="markerWrapper"><img class="markerImage" src="' + found.image + '" alt="' + found.title + ' Event Image">' + '<h5 class="markerTitle">' + found.title + '</h5>' + '<p class="markerCategory">' + found.category + '</p>' + '<p class="markerDate">' + found.date() + '</p>' + '<p class="markerDescription">' + found.description + '</p></div>';
          infoWindow.setContent(content);
-
          infoWindow.open(map, obj);
      };
 
@@ -216,11 +254,16 @@
              self.previousMarker().setAnimation(null);
          }
      };
+     self.stopAllAnimation = function(){
+         self.markers().forEach(function(marker){
+             marker.setAnimation(4);
+         });
+     };
 
      self.checkedIsSelected = function (id) {
          return self.selectedID() == id;
      };
-     
+
      self.clickEvent = function (obj) {
          self.clearPreviousInfoWindow();
          self.stopAnimation();
@@ -238,7 +281,7 @@
          }
          previousObj = obj;
      };
-     
+
      // For every change in the search bar, the events and markers are filtered based on current input
      self.updateView = function (obj) {
          self.selectedID("");
@@ -247,4 +290,3 @@
          self.getMarkers(self.userInput());
      };
  }
-

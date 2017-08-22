@@ -7,6 +7,6 @@
 5. Type in the search bar to filter through events.
 
 ## For Review
-1. Open terminal and change the current directory to the project directory
-2. Run `python -m SimpleHTTPServer 3000`
-3. Go to Chrome and type `http://localhost:3000/`
+1. Open project folder
+2. Go to `src`
+3. Double click `index.hmtl`
